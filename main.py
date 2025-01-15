@@ -20,6 +20,7 @@ class Resource:
         self.start_screen_bg = pg.image.load("./img/start_screen_bg.png")
         self.start_screen_bg = pg.transform.scale(self.start_screen_bg, (self.start_screen_bg.get_width() * 5, self.start_screen_bg.get_height() * 5))
 
+
 # スタート画面
 class StartScrean:
     def __init__(self, resources):
@@ -42,6 +43,7 @@ class CharacterSelect:
         self.resources = resources
 
     # def run(self, screen):
+
 
 # コース選択画面
 class CourceSelect:

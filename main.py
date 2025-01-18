@@ -180,7 +180,7 @@ class TimeAttack:
         self.x_pos, self.y_pos, self.rot = 0, 0, 0
         self.frame = np.random.uniform(0, 1, (self.hres, self.harf_vres*2, 3))
 
-        self.cource = pg.surfarray.array3d(self.resources.cource_images[0]["show"])
+        self.cource = pg.surfarray.array3d(self.resources.cource_images[3]["show"])
         self.sky = pg.surfarray.array3d(pg.transform.scale(self.resources.cource_images[0]["sky"], (360, self.harf_vres*2)))
         # self.game_state = "running"
 
@@ -202,7 +202,7 @@ class TimeAttack:
             for j in range(self.harf_vres):
                 n = (self.harf_vres/(self.harf_vres-j))/cos2
                 x, y = self.x_pos + n*cos, self.y_pos + n*sin
-                xx, yy = int(x/10%1*200), int(y/10%1*200)
+                xx, yy = int(x/20%1*200), int(y/20%1*200)
                 self.frame[i][self.harf_vres*2-j-1] = self.cource[xx][yy]/255
 
                 # if int(x)%2 == int(y)%2:
@@ -220,9 +220,9 @@ class TimeAttack:
 
     def movement(self, x_pos, y_pos, rot, keys):
         if keys[pg.K_LEFT] or keys[pg.K_a]:
-            rot -= 0.1
+            rot -= 0.05
         if keys[pg.K_RIGHT] or keys[pg.K_d]:
-            rot += 0.1
+            rot += 0.05
         if keys[pg.K_UP] or keys[pg.K_w]:
             x_pos += 0.1*np.cos(rot)
             y_pos += 0.1*np.sin(rot)

@@ -1,4 +1,6 @@
 import pygame as pg
+import numpy as np
+import time
 
 pg.init() # 初期化
 window_size = (800, 600)
@@ -29,33 +31,54 @@ class Resource:
         font_size = 30
         font = pg.font.Font(font_path, font_size)
 
-        self.time_attack_button = Button(500, 300, 200, 100, "Time Attack", font, (26, 175, 0), (255, 255, 255))
-        self.credit_button = Button(500, 400, 200, 100, "Credit", font, (26, 175, 0), (255, 255, 255))
+        # (x, y, width, height, text, font, color, hover_color)
+        self.character_select_button = Button(500, 300, 300, 100, "Time Attack", font, (26, 175, 0), (255, 255, 255))
+        self.credit_button = Button(500, 400, 300, 100, "Credit", font, (26, 175, 0), (255, 255, 255))
+        self.cource_select_button = Button(500, 500, 300, 100, "Cource Select", font, (26, 175, 0), (255, 255, 255))
+        self.time_attack_button = Button(500, 500, 300, 100, "Time Attack", font, (26, 175, 0), (255, 255, 255))
 
+        arrow_scale = 2
         self.right_arrow = pg.image.load("./img/right_arrow.png")
+        self.right_arrow = pg.transform.scale(self.right_arrow, (self.right_arrow.get_width() * arrow_scale, self.right_arrow.get_height() * arrow_scale))
         self.left_arrow = pg.transform.flip(self.right_arrow, True, False)
 
-        self.otete1 = pg.image.load("./img/otetekart1.png")
-        self.otete1_select = self.otete1.subsurface(pg.Rect(0, 0, 50, 50))
-        self.otete1_right = self.otete1.subsurface(pg.Rect(50, 0, 50, 50))
-        self.otete1_center = self.otete1.subsurface(pg.Rect(100, 0, 50, 50))
-        self.otete1_left = self.otete1.subsurface(pg.Rect(150, 0, 50, 50))
-        self.otete2 = pg.image.load("./img/otetekart2.png")
-        self.otete2_select = self.otete2.subsurface(pg.Rect(0, 0, 50, 50))
-        self.otete2_right = self.otete2.subsurface(pg.Rect(50, 0, 50, 50))
-        self.otete2_center = self.otete2.subsurface(pg.Rect(100, 0, 50, 50))
-        self.otete2_left = self.otete2.subsurface(pg.Rect(150, 0, 50, 50))
-        self.otete3 = pg.image.load("./img/otetekart3.png")
-        self.otete3_select = self.otete3.subsurface(pg.Rect(0, 0, 50, 50))
-        self.otete3_right = self.otete3.subsurface(pg.Rect(50, 0, 50, 50))
-        self.otete3_center = self.otete3.subsurface(pg.Rect(100, 0, 50, 50))
-        self.otete3_left = self.otete3.subsurface(pg.Rect(150, 0, 50, 50))
-        self.otete4 = pg.image.load("./img/otetekart4.png")
-        self.otete4_select = self.otete4.subsurface(pg.Rect(0, 0, 50, 50))
-        self.otete4_right = self.otete4.subsurface(pg.Rect(50, 0, 50, 50))
-        self.otete4_center = self.otete4.subsurface(pg.Rect(100, 0, 50, 50))
-        self.otete4_left = self.otete4.subsurface(pg.Rect(150, 0, 50, 50))
-
+        # self.otete1 = pg.image.load("./img/otetekart1.png")
+        # self.otete1_select = self.otete1.subsurface(pg.Rect(0, 0, 50, 50))
+        # self.otete1_left = self.otete1.subsurface(pg.Rect(50, 0, 50, 50))
+        # self.otete1_center = self.otete1.subsurface(pg.Rect(100, 0, 50, 50))
+        # self.otete1_right = self.otete1.subsurface(pg.Rect(150, 0, 50, 50))
+        # self.otete2 = pg.image.load("./img/otetekart2.png")
+        # self.otete2_select = self.otete2.subsurface(pg.Rect(0, 0, 50, 50))
+        # self.otete2_left = self.otete2.subsurface(pg.Rect(50, 0, 50, 50))
+        # self.otete2_center = self.otete2.subsurface(pg.Rect(100, 0, 50, 50))
+        # self.otete2_right = self.otete2.subsurface(pg.Rect(150, 0, 50, 50))
+        # self.otete3 = pg.image.load("./img/otetekart3.png")
+        # self.otete3_select = self.otete3.subsurface(pg.Rect(0, 0, 50, 50))
+        # self.otete3_left = self.otete3.subsurface(pg.Rect(50, 0, 50, 50))
+        # self.otete3_center = self.otete3.subsurface(pg.Rect(100, 0, 50, 50))
+        # self.otete3_right = self.otete3.subsurface(pg.Rect(150, 0, 50, 50))
+        # self.otete4 = pg.image.load("./img/otetekart4.png")
+        # self.otete4_select = self.otete4.subsurface(pg.Rect(0, 0, 50, 50))
+        # self.otete4_left = self.otete4.subsurface(pg.Rect(50, 0, 50, 50))
+        # self.otete4_center = self.otete4.subsurface(pg.Rect(100, 0, 50, 50))
+        # self.otete4_right = self.otete4.subsurface(pg.Rect(150, 0, 50, 50))
+        self.otete_images = {}
+        otete_scale = 4
+        for i in range(4):
+            otete = pg.image.load(f"./img/otetekart{i+1}.png")
+            self.otete_images[i] = {
+                "select": pg.transform.scale(otete.subsurface(pg.Rect(0, 0, 50, 50)), (otete.subsurface(pg.Rect(0, 0, 50, 50)).get_width() * otete_scale, otete.subsurface(pg.Rect(0, 0, 50, 50)).get_height() * otete_scale)),
+                "left": pg.transform.scale(otete.subsurface(pg.Rect(50, 0, 50, 50)), (otete.subsurface(pg.Rect(50, 0, 50, 50)).get_width() * otete_scale, otete.subsurface(pg.Rect(50, 0, 50, 50)).get_height() * otete_scale)),
+                "center": pg.transform.scale(otete.subsurface(pg.Rect(100, 0, 50, 50)), (otete.subsurface(pg.Rect(100, 0, 50, 50)).get_width() * otete_scale, otete.subsurface(pg.Rect(100, 0, 50, 50)).get_height() * otete_scale)),
+                "right": pg.transform.scale(otete.subsurface(pg.Rect(150, 0, 50, 50)), (otete.subsurface(pg.Rect(150, 0, 50, 50)).get_width() * otete_scale, otete.subsurface(pg.Rect(150, 0, 50, 50)).get_height() * otete_scale)),
+            }
+        self.cource_images = {}
+        for i in range(4):
+            cource = pg.image.load(f"./img/cource{i+1}.png")
+            self.cource_images[i] = {
+                "show": cource.subsurface(pg.Rect(0, 0, 200, 200)),
+                "collision": cource.subsurface(pg.Rect(200, 200, 200, 200)),
+            }
 
 class Button:
     def __init__(self, x, y, width, height, text, font, color, hover_color):
@@ -86,7 +109,6 @@ class Button:
                 return True
         return False
 
-
 # スタート画面
 class StartScrean:
     def __init__(self, resources):
@@ -95,13 +117,13 @@ class StartScrean:
     def run(self, screen, events):
         screen.blit(self.resources.start_screen_bg, (0, 0))
 
-        self.resources.time_attack_button.draw(screen)
+        self.resources.character_select_button.draw(screen)
         self.resources.credit_button.draw(screen)
 
         for event in events:
             if event.type == pg.QUIT:
                 return "quit"
-            if self.resources.time_attack_button.is_clicked(event):
+            if self.resources.character_select_button.is_clicked(event):
                 return GameState.character_select
             if self.resources.credit_button.is_clicked(event):
                 return GameState.credit_screen
@@ -112,20 +134,62 @@ class StartScrean:
 class CharacterSelect:
     def __init__(self, resources):
         self.resources = resources
+        self.current_otete = 1
 
     def run(self, screen, events):
         screen.blit(self.resources.character_select_bg, (0, 0))
 
+        screen.blit(self.resources.otete_images[self.current_otete]["select"], (300, 200))
+
+        screen.blit(self.resources.left_arrow, (200, 300))
+        screen.blit(self.resources.right_arrow, (500, 300))
+
+        self.resources.cource_select_button.draw(screen)
+
+        for event in events:
+            if event.type == pg.QUIT:
+                return "quit"
+            if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
+                if pg.Rect(200, 300, 100, 100).collidepoint(event.pos):
+                    self.current_otete = (self.current_otete - 1) % 4
+                if pg.Rect(500, 300, 100, 100).collidepoint(event.pos):
+                    self.current_otete = (self.current_otete + 1) % 4
+            if self.resources.cource_select_button.is_clicked(event):
+                return GameState.cource_select
+        return GameState.character_select
 
 # コース選択画面
 class CourceSelect:
-    def __init__(self):
-        pass
+    def __init__(self, resources):
+        self.resources = resources
+        self.current_cource = 0
+
+    def run(self, screen, events):
+        screen.blit(self.resources.cource_select_bg, (0, 0))
+
+        screen.blit(self.resources.cource_images[self.current_cource], (300, 200))
+
+        screen.blit(self.resources.left_arrow, (200, 300))
+        screen.blit(self.resources.right_arrow, (500, 300))
+
+        self.resources.time_attack_button.draw(screen)
+
+        for event in events:
+            if event.type == pg.QUIT:
+                return "quit"
+            if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
+                if pg.Rect(200, 300, 100, 100).collidepoint(event.pos):
+                    self.current_cource = (self.current_cource - 1) % 4
+                if pg.Rect(500, 300, 100, 100).collidepoint(event.pos):
+                    self.current_cource = (self.current_cource + 1) % 4
+            if self.resources.time_attack_button.is_clicked(event):
+                return GameState.time_attack
+        return GameState.cource_select
 
 # タイムアタック画面
 class TimeAttack:
-    def __init__(self):
-        pass
+    def __init__(self, resources):
+        self.resources = resources
 
 # リザルト画面
 class ResultScreen:
@@ -144,7 +208,7 @@ def main():
     screens = {
         GameState.start_screen: StartScrean(resources),
         GameState.character_select: CharacterSelect(resources),
-        # GameState.cource_select: CourceSelect(resources),
+        GameState.cource_select: CourceSelect(resources),
         # GameState.time_attack: TimeAttack(resources),
         # GameState.result_screen: ResultScreen(resources),
         # GameState.credit_screen: CreditScreen(resources),
@@ -157,19 +221,6 @@ def main():
                 running = False
 
         # ゲームの状態に応じて画面を描画
-        # if state == GameState.start_screen:
-        #     screens[GameState.start_screen].run(screen)
-        # elif state == GameState.character_select:
-        #     screens[GameState.character_select].run(screen)
-        # elif state == GameState.cource_select:
-        #     screens[GameState.cource_select].run(screen)
-        # elif state == GameState.time_attack:
-        #     screens[GameState.time_attack].run(screen)
-        # elif state == GameState.result_screen:
-        #     screens[GameState.result_screen].run(screen)
-        # elif state == GameState.credit_screen:
-        #     screens[GameState.credit_screen].run(screen)
-
         if state in screens:
             new_state = screens[state].run(screen, events)
             if new_state == "quit":

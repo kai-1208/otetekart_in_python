@@ -53,13 +53,12 @@ class Resource:
                 "right": pg.transform.scale(otete.subsurface(pg.Rect(150, 0, 50, 50)), (otete.subsurface(pg.Rect(150, 0, 50, 50)).get_width() * otete_scale, otete.subsurface(pg.Rect(150, 0, 50, 50)).get_height() * otete_scale)),
             }
         self.cource_images = {}
-        sky_scale = 0.5
         for i in range(4):
             cource = pg.image.load(f"./img/cource{i+1}.png")
             self.cource_images[i] = {
                 "collision": cource.subsurface(pg.Rect(0, 0, 200, 200)),
                 "show": cource.subsurface(pg.Rect(200, 0, 200, 200)),
-                "sky": pg.transform.scale(cource.subsurface(pg.Rect(400, 0, 200, 50)), (cource.subsurface(pg.Rect(400, 0, 200, 50)).get_width() * sky_scale, cource.subsurface(pg.Rect(400, 0, 200, 50)).get_height() * sky_scale)),
+                "sky": cource.subsurface(pg.Rect(400, 0, 200, 50)),
             }
 
 class Button:

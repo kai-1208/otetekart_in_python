@@ -6,7 +6,7 @@ pg.init() # 初期化
 window_size = (800, 600)
 screen = pg.display.set_mode(window_size)
 clock = pg.time.Clock()
-pg.display.set_caption("otete kart")
+# pg.display.set_caption("otete kart")
 
 # ゲームの状態管理
 class GameState:
@@ -42,26 +42,6 @@ class Resource:
         self.right_arrow = pg.transform.scale(self.right_arrow, (self.right_arrow.get_width() * arrow_scale, self.right_arrow.get_height() * arrow_scale))
         self.left_arrow = pg.transform.flip(self.right_arrow, True, False)
 
-        # self.otete1 = pg.image.load("./img/otetekart1.png")
-        # self.otete1_select = self.otete1.subsurface(pg.Rect(0, 0, 50, 50))
-        # self.otete1_left = self.otete1.subsurface(pg.Rect(50, 0, 50, 50))
-        # self.otete1_center = self.otete1.subsurface(pg.Rect(100, 0, 50, 50))
-        # self.otete1_right = self.otete1.subsurface(pg.Rect(150, 0, 50, 50))
-        # self.otete2 = pg.image.load("./img/otetekart2.png")
-        # self.otete2_select = self.otete2.subsurface(pg.Rect(0, 0, 50, 50))
-        # self.otete2_left = self.otete2.subsurface(pg.Rect(50, 0, 50, 50))
-        # self.otete2_center = self.otete2.subsurface(pg.Rect(100, 0, 50, 50))
-        # self.otete2_right = self.otete2.subsurface(pg.Rect(150, 0, 50, 50))
-        # self.otete3 = pg.image.load("./img/otetekart3.png")
-        # self.otete3_select = self.otete3.subsurface(pg.Rect(0, 0, 50, 50))
-        # self.otete3_left = self.otete3.subsurface(pg.Rect(50, 0, 50, 50))
-        # self.otete3_center = self.otete3.subsurface(pg.Rect(100, 0, 50, 50))
-        # self.otete3_right = self.otete3.subsurface(pg.Rect(150, 0, 50, 50))
-        # self.otete4 = pg.image.load("./img/otetekart4.png")
-        # self.otete4_select = self.otete4.subsurface(pg.Rect(0, 0, 50, 50))
-        # self.otete4_left = self.otete4.subsurface(pg.Rect(50, 0, 50, 50))
-        # self.otete4_center = self.otete4.subsurface(pg.Rect(100, 0, 50, 50))
-        # self.otete4_right = self.otete4.subsurface(pg.Rect(150, 0, 50, 50))
         self.otete_images = {}
         otete_scale = 4
         for i in range(4):
@@ -73,11 +53,13 @@ class Resource:
                 "right": pg.transform.scale(otete.subsurface(pg.Rect(150, 0, 50, 50)), (otete.subsurface(pg.Rect(150, 0, 50, 50)).get_width() * otete_scale, otete.subsurface(pg.Rect(150, 0, 50, 50)).get_height() * otete_scale)),
             }
         self.cource_images = {}
+        sky_scale = 0.5
         for i in range(4):
             cource = pg.image.load(f"./img/cource{i+1}.png")
             self.cource_images[i] = {
-                "show": cource.subsurface(pg.Rect(0, 0, 200, 200)),
-                "collision": cource.subsurface(pg.Rect(200, 200, 200, 200)),
+                "collision": cource.subsurface(pg.Rect(0, 0, 200, 200)),
+                "show": cource.subsurface(pg.Rect(200, 0, 200, 200)),
+                "sky": pg.transform.scale(cource.subsurface(pg.Rect(400, 0, 200, 50)), (cource.subsurface(pg.Rect(400, 0, 200, 50)).get_width() * sky_scale, cource.subsurface(pg.Rect(400, 0, 200, 50)).get_height() * sky_scale)),
             }
 
 class Button:
@@ -167,7 +149,7 @@ class CourceSelect:
     def run(self, screen, events):
         screen.blit(self.resources.cource_select_bg, (0, 0))
 
-        screen.blit(self.resources.cource_images[self.current_cource], (300, 200))
+        screen.blit(self.resources.cource_images[self.current_cource]["show"], (300, 200))
 
         screen.blit(self.resources.left_arrow, (200, 300))
         screen.blit(self.resources.right_arrow, (500, 300))
@@ -191,6 +173,64 @@ class TimeAttack:
     def __init__(self, resources):
         self.resources = resources
 
+        self.hres = 120 # 水平解像度
+        self.harf_vres = 100 # 垂直解像度の半分
+        self.mod = self.hres/60
+
+        self.x_pos, self.y_pos, self.rot = 0, 0, 0
+        self.frame = np.random.uniform(0, 1, (self.hres, self.harf_vres*2, 3))
+
+        self.cource = pg.surfarray.array3d(self.resources.cource_images[0]["show"])
+        self.sky = pg.surfarray.array3d(pg.transform.scale(self.resources.cource_images[0]["sky"], (360, self.harf_vres*2)))
+        # self.game_state = "running"
+
+    def run(self, screen, events):
+        for event in events:
+            if event.type == pg.QUIT:
+                return "quit"
+
+        for i in range(self.hres):
+            i_rot = self.rot + np.deg2rad(i/self.mod-30)
+            sin, cos = np.sin(i_rot), np.cos(i_rot)
+            cos2 = np.cos(np.deg2rad(i/self.mod-30))
+            index = int(np.rad2deg(i_rot)%360)
+            if index >= 360:
+                index = 359
+            self.frame[i][:] = self.sky[index][:]/255
+            # self.frame[i][:] = self.sky[int(np.rad2deg(i_rot)%360)][:]/255
+
+            for j in range(self.harf_vres):
+                n = (self.harf_vres/(self.harf_vres-j))/cos2
+                x, y = self.x_pos + n*cos, self.y_pos + n*sin
+                xx, yy = int(x/10%1*200), int(y/10%1*200)
+                self.frame[i][self.harf_vres*2-j-1] = self.cource[xx][yy]/255
+
+                # if int(x)%2 == int(y)%2:
+                #     self.frame[i][self.harf_vres*2-j-1] = [0, 0, 0]
+                # else:
+                #     self.frame[i][self.harf_vres*2-j-1] = [1, 1, 1]
+
+        surf = pg.surfarray.make_surface(self.frame*255)
+        surf = pg.transform.scale(surf, (800, 600))
+        screen.blit(surf, (0, 0))
+
+        self.x_pos, self.y_pos, self.rot = self.movement(self.x_pos, self.y_pos, self.rot, pg.key.get_pressed())
+
+        return GameState.time_attack
+
+    def movement(self, x_pos, y_pos, rot, keys):
+        if keys[pg.K_LEFT] or keys[pg.K_a]:
+            rot -= 0.1
+        if keys[pg.K_RIGHT] or keys[pg.K_d]:
+            rot += 0.1
+        if keys[pg.K_UP] or keys[pg.K_w]:
+            x_pos += 0.1*np.cos(rot)
+            y_pos += 0.1*np.sin(rot)
+        if keys[pg.K_DOWN] or keys[pg.K_s]:
+            x_pos -= 0.1*np.cos(rot)
+            y_pos -= 0.1*np.sin(rot)
+        return x_pos, y_pos, rot
+
 # リザルト画面
 class ResultScreen:
     def __init__(self):
@@ -209,7 +249,7 @@ def main():
         GameState.start_screen: StartScrean(resources),
         GameState.character_select: CharacterSelect(resources),
         GameState.cource_select: CourceSelect(resources),
-        # GameState.time_attack: TimeAttack(resources),
+        GameState.time_attack: TimeAttack(resources),
         # GameState.result_screen: ResultScreen(resources),
         # GameState.credit_screen: CreditScreen(resources),
     }
@@ -230,6 +270,7 @@ def main():
 
         pg.display.update() # 画面を更新
         clock.tick(60) # 60FPSに設定
+        pg.display.set_caption(f"otete kart FPS: {int(clock.get_fps())}")
 
     pg.quit()
 

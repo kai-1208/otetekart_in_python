@@ -179,7 +179,7 @@ class TimeAttack:
         self.x_pos, self.y_pos, self.rot = 0, 0, 0
         self.frame = np.random.uniform(0, 1, (self.hres, self.harf_vres*2, 3))
 
-        self.cource = pg.surfarray.array3d(self.resources.cource_images[3]["show"])
+        self.cource = pg.surfarray.array3d(self.resources.cource_images[0]["show"])
         self.sky = pg.surfarray.array3d(pg.transform.scale(self.resources.cource_images[0]["sky"], (360, self.harf_vres*2)))
         # self.game_state = "running"
 

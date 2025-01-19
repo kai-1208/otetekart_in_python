@@ -173,6 +173,13 @@ class TimeAttack:
         self.harf_vres = 100 # 垂直解像度の半分
         self.mod = self.hres/60
         self.font = pg.font.Font("./fonts/cellar.ttf", 20)
+        self.countdown_start_time = None
+        self.countdown = 4
+        self.initialized = False
+        self.paused = False
+        self.pause_start_time = None # ポーズ開始時間
+        self.total_pause_time = 0 # ポーズの合計時間
+        self.lap_pause_times = [] # ラップのポーズ時間
         self.reset()
 
     def reset(self):
@@ -180,10 +187,20 @@ class TimeAttack:
         self.velocity = 0
         self.lap_detection = False # 周回判定
         self.lap_count = 0
-        self.lap_start_time = time.time()
         self.lap_times = []
-        self.frame = np.random.uniform(0, 1, (self.hres, self.harf_vres * 2, 3)) # フレームの初期化
         self.collision_check = False # 当たり判定
+        self.frame = np.random.uniform(0, 1, (self.hres, self.harf_vres * 2, 3)) # フレームの初期化
+        self.cource = pg.surfarray.array3d(self.resources.cource_images[self.resources.current_cource]["show"])
+        self.sky = pg.surfarray.array3d(pg.transform.scale(self.resources.cource_images[self.resources.current_cource]["sky"], (360, self.harf_vres*2)))
+        if not self.initialized:
+            self.frame = new_frame(self.x_pos, self.y_pos, self.rot, self.hres, self.harf_vres, self.mod, self.sky, self.cource, self.frame)
+            self.initialized = True
+        self.lap_start_time = None
+        self.countdown_start_time = time.time()
+        self.paused = False
+        self.pause_start_time = None
+        self.total_pause_time = 0
+        self.lap_pause_times = [0] * 3
 
     def run(self, screen, events):
         for event in events:
@@ -192,9 +209,41 @@ class TimeAttack:
             if self.resources.start_screen_button.is_clicked(event):
                 self.reset()
                 return GameState.start_screen
+            if event.type == pg.KEYDOWN and event.key == pg.K_p:
+                self.paused = not self.paused
+                if self.paused:
+                    self.pause_start_time = time.time()
+                else:
+                    pause_time = time.time() - self.pause_start_time
+                    self.total_pause_time += time.time() - self.pause_start_time
+                    if self.lap_count < len(self.lap_pause_times):
+                        self.lap_pause_times[self.lap_count] += pause_time
+                    # else:
+                    #     self.lap_pause_times.append(pause_time)
 
-        self.cource = pg.surfarray.array3d(self.resources.cource_images[self.resources.current_cource]["show"])
-        self.sky = pg.surfarray.array3d(pg.transform.scale(self.resources.cource_images[self.resources.current_cource]["sky"], (360, self.harf_vres*2)))
+        if self.paused:
+            screen.blit(self.font.render("Paused", True, (255, 255, 255)), (400, 300))
+            self.resources.start_screen_button.draw(screen)
+            pg.display.flip()
+            return GameState.time_attack
+
+        # カウントダウン
+        elapsed_time = time.time() - self.countdown_start_time - self.total_pause_time
+        if elapsed_time < self.countdown + 1:
+            countdown_value = self.countdown - int(elapsed_time)
+            if countdown_value > 0:
+                countdown_text = str(countdown_value)
+            else:
+                countdown_text = "Go!"
+            countdown_text_surface = self.font.render(countdown_text, True, (255, 255, 255))
+            screen.blit(pg.transform.scale(pg.surfarray.make_surface(self.frame * 255), (800, 600)), (0, 0))
+            screen.blit(countdown_text_surface, (400, 300))
+            pg.display.flip()
+            return GameState.time_attack
+        
+        if self.lap_start_time is None:
+            self.lap_start_time = time.time()
+        
         self.frame = new_frame(self.x_pos, self.y_pos, self.rot, self.hres, self.harf_vres, self.mod, self.sky, self.cource, self.frame)
         surf = pg.surfarray.make_surface(self.frame*255)
         surf = pg.transform.scale(surf, (800, 600))
@@ -257,7 +306,10 @@ class TimeAttack:
                     self.lap_count += 1
                     self.lap_detection = False
                     lap_end_time = time.time()
-                    lap_time = lap_end_time - self.lap_start_time
+                    if self.lap_count <= len(self.lap_pause_times):
+                        lap_time = lap_end_time - self.lap_start_time - self.lap_pause_times[self.lap_count - 1]
+                    else:
+                        lap_time = lap_end_time - self.lap_start_time
                     self.lap_times.append(lap_time)
                     self.lap_start_time = lap_end_time
                     if self.lap_count == 3:

@@ -197,14 +197,15 @@ class CourceSelect:
 class TimeAttack:
     def __init__(self, resources):
         self.resources = resources
-        self.button = Button(400, 500, 400, 100, "Back to Start Screen", self.resources.font, (26, 175, 0), (76, 225, 50))
+        self.button1 = Button(400, 500, 400, 100, "Back to Start Screen", self.resources.font, (26, 175, 0), (76, 225, 50))
+        self.button2 = Button(400, 400, 400, 100, "Retry", self.resources.font, (26, 175, 0), (76, 225, 50))
         self.hres = 120 # 水平解像度
         self.harf_vres = 100 # 垂直解像度の半分
         self.mod = self.hres/60
         self.font = pg.font.Font("./fonts/cellar.ttf", 20)
         self.frame = np.zeros((self.hres, self.harf_vres*2, 3))
         self.countdown_start_time = None
-        self.countdown = 4
+        self.countdown = 3
         self.initialized = False
         self.paused = False
         self.pause_start_time = None # ポーズ開始時間
@@ -236,9 +237,13 @@ class TimeAttack:
         for event in events:
             if event.type == pg.QUIT:
                 return "quit"
-            if self.button.is_clicked(event):
+            if self.button1.is_clicked(event):
                 self.reset()
                 return GameState.start_screen
+            if self.button2.is_clicked(event):
+                self.reset()
+                self.paused = False
+                return GameState.time_attack
             if event.type == pg.KEYDOWN and event.key == pg.K_p:
                 self.paused = not self.paused
                 if self.paused:
@@ -251,7 +256,8 @@ class TimeAttack:
 
         if self.paused:
             screen.blit(self.font.render("Paused", True, (255, 255, 255)), (400, 300))
-            self.button.draw(screen)
+            self.button1.draw(screen)
+            self.button2.draw(screen)
             pg.display.flip()
             return GameState.time_attack
 
@@ -365,7 +371,7 @@ class TimeAttack:
             screen.blit(total_time_text, (400, 10 + len(self.lap_times) * 30))
             thank_you_text = self.font.render("Thank you for playing!", True, (255, 255, 255))
             screen.blit(thank_you_text, (400, 10 + (len(self.lap_times) + 1) * 30))
-            self.button.draw(screen)
+            self.button1.draw(screen)
 
 @njit # fps上げるためにnumbaで高速化
 def new_frame(x_pos, y_pos, rot, hres, harf_vres, mod, sky, cource, frame):

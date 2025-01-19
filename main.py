@@ -61,7 +61,7 @@ class Resource:
         self.player = pg.image.load("./img/player.png")
         # player_scale = 10
         # self.player = pg.transform.scale(self.player, (self.player.get_width() * player_scale, self.player.get_height() * player_scale))
-        self.current_otete = 1
+        self.current_otete = 0
         self.current_cource = 0
 
         self.character_parameter = [

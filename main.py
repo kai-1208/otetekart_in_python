@@ -205,7 +205,8 @@ class TimeAttack:
         self.font = pg.font.Font("./fonts/cellar.ttf", 20)
         self.frame = np.zeros((self.hres, self.harf_vres*2, 3))
         self.countdown_start_time = None
-        self.countdown = 3
+        self.countdown = 4
+        self.delay = 1
         self.initialized = False
         self.paused = False
         self.pause_start_time = None # ポーズ開始時間
@@ -261,6 +262,13 @@ class TimeAttack:
             pg.display.flip()
             return GameState.time_attack
 
+        # カウントダウンの前にディレイ
+        elapsed_time = time.time() - self.countdown_start_time - self.total_pause_time
+        if elapsed_time < self.delay:
+            screen.blit(pg.transform.scale(pg.surfarray.make_surface(self.frame * 255), (800, 600)), (0, 0))
+            pg.display.flip()
+            return GameState.time_attack
+        
         # カウントダウン
         elapsed_time = time.time() - self.countdown_start_time - self.total_pause_time
         if elapsed_time < self.countdown + 1:

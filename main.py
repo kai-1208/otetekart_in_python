@@ -263,7 +263,7 @@ class TimeAttack:
                     if self.lap_count == 3:
                         self.total_time = sum(self.lap_times)
 
-        screen.blit(self.resources.cource_images[self.resources.current_cource]["collision"], (0, 0))
+        screen.blit(self.resources.cource_images[self.resources.current_cource]["show"], (0, 0))
         screen.blit(self.resources.player, (x_pos * 10, y_pos * 10))
 
     def render(self, screen, keys):

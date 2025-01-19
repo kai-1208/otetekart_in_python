@@ -1,6 +1,7 @@
 import pygame as pg
 import numpy as np
 import time
+from numba import njit
 
 pg.init() # 初期化
 window_size = (800, 600)
@@ -60,6 +61,9 @@ class Resource:
                 "show": cource.subsurface(pg.Rect(200, 0, 200, 200)),
                 "sky": cource.subsurface(pg.Rect(400, 0, 200, 50)),
             }
+        self.player = pg.image.load("./img/player.png")
+        player_scale = 10
+        self.player = pg.transform.scale(self.player, (self.player.get_width() * player_scale, self.player.get_height() * player_scale))
 
 class Button:
     def __init__(self, x, y, width, height, text, font, color, hover_color):
@@ -171,64 +175,103 @@ class CourceSelect:
 class TimeAttack:
     def __init__(self, resources):
         self.resources = resources
-
         self.hres = 120 # 水平解像度
         self.harf_vres = 100 # 垂直解像度の半分
         self.mod = self.hres/60
-
-        self.x_pos, self.y_pos, self.rot = 0, 0, 0
+        self.x_pos, self.y_pos, self.rot = 13, 2.5, np.pi
+        self.velocity = 0
         self.frame = np.random.uniform(0, 1, (self.hres, self.harf_vres*2, 3))
-
-        self.cource = pg.surfarray.array3d(self.resources.cource_images[1]["show"])
+        self.cource = pg.surfarray.array3d(self.resources.cource_images[0]["show"])
         self.sky = pg.surfarray.array3d(pg.transform.scale(self.resources.cource_images[1]["sky"], (360, self.harf_vres*2)))
-        # self.game_state = "running"
+        self.collision_check = False
 
     def run(self, screen, events):
         for event in events:
             if event.type == pg.QUIT:
                 return "quit"
 
-        for i in range(self.hres):
-            i_rot = self.rot + np.deg2rad(i/self.mod-30)
-            sin, cos = np.sin(i_rot), np.cos(i_rot)
-            cos2 = np.cos(np.deg2rad(i/self.mod-30))
-            index = int(np.rad2deg(i_rot)%360)
-            if index >= 360:
-                index = 359
-            self.frame[i][:] = self.sky[index][:]/255
-            # self.frame[i][:] = self.sky[int(np.rad2deg(i_rot)%360)][:]/255
-
-            for j in range(self.harf_vres):
-                n = (self.harf_vres/(self.harf_vres-j))/cos2
-                x, y = self.x_pos + n*cos, self.y_pos + n*sin
-                xx, yy = int(x/20%1*200), int(y/20%1*200)
-                self.frame[i][self.harf_vres*2-j-1] = self.cource[xx][yy]/255
-
-                # if int(x)%2 == int(y)%2:
-                #     self.frame[i][self.harf_vres*2-j-1] = [0, 0, 0]
-                # else:
-                #     self.frame[i][self.harf_vres*2-j-1] = [1, 1, 1]
-
+        self.frame = new_frame(self.x_pos, self.y_pos, self.rot, self.hres, self.harf_vres, self.mod, self.sky, self.cource, self.frame)
         surf = pg.surfarray.make_surface(self.frame*255)
         surf = pg.transform.scale(surf, (800, 600))
         screen.blit(surf, (0, 0))
-
-        self.x_pos, self.y_pos, self.rot = self.movement(self.x_pos, self.y_pos, self.rot, pg.key.get_pressed())
+        self.x_pos, self.y_pos, self.rot, self.velocity = self.movement(self.x_pos, self.y_pos, self.rot, pg.key.get_pressed(), self.collision_check, self.velocity)
+        self.collision(self.x_pos, self.y_pos, self.rot)
+        self.render(screen, pg.key.get_pressed())
 
         return GameState.time_attack
 
-    def movement(self, x_pos, y_pos, rot, keys):
+    def movement(self, x_pos, y_pos, rot, keys, collision_check, velocity):
         if keys[pg.K_LEFT] or keys[pg.K_a]:
-            rot -= 0.05
+            rot -= 0.03
         if keys[pg.K_RIGHT] or keys[pg.K_d]:
-            rot += 0.05
+            rot += 0.03
         if keys[pg.K_UP] or keys[pg.K_w]:
-            x_pos += 0.1*np.cos(rot)
-            y_pos += 0.1*np.sin(rot)
-        if keys[pg.K_DOWN] or keys[pg.K_s]:
-            x_pos -= 0.1*np.cos(rot)
-            y_pos -= 0.1*np.sin(rot)
-        return x_pos, y_pos, rot
+            if collision_check == False: # 0.05
+                if velocity < 0.05:
+                    velocity += 0.001
+                x_pos += velocity*np.cos(rot)
+                y_pos += velocity*np.sin(rot)
+            elif collision_check == True: # 0.1
+                velocity = -0.05
+                x_pos += velocity*np.cos(rot)
+                y_pos += velocity*np.sin(rot)
+            elif collision_check == "Dirt": # 0.02
+                velocity = 0.02
+                x_pos += velocity*np.cos(rot)
+                y_pos += velocity*np.sin(rot)
+        else:
+            if velocity > 0:
+                velocity -= 0.001
+            if velocity < 0.005:
+                velocity = 0
+            x_pos += velocity*np.cos(rot)
+            y_pos += velocity*np.sin(rot)
+
+        return x_pos, y_pos, rot, velocity
+
+    def collision(self, x_pos, y_pos, rot):
+        player_x, player_y = int(x_pos * 10), int(y_pos * 10)
+        cource_array = pg.surfarray.array3d(self.resources.cource_images[0]["collision"])
+
+        if 0 <= player_x < cource_array.shape[0] and 0 <= player_y < cource_array.shape[1]:
+            pixel_color = cource_array[player_x, player_y]
+
+            if (pixel_color == [0, 0, 0]).all():
+                self.collision_check = True
+            elif (pixel_color == [255, 255, 255]).all():
+                self.collision_check = False
+            elif (pixel_color == [127, 0, 0]).all():
+                self.collision_check = "Dirt"
+
+        screen.blit(self.resources.cource_images[0]["collision"], (0, 0))
+        screen.blit(self.resources.player, (x_pos * 10, y_pos * 10))
+
+    def render(self, screen, keys):
+        if keys[pg.K_LEFT] or keys[pg.K_a]:
+            screen.blit(self.resources.otete_images[0]["left"], (300, 450))
+        elif keys[pg.K_RIGHT] or keys[pg.K_d]:
+            screen.blit(self.resources.otete_images[0]["right"], (300, 450))
+        else:
+            screen.blit(self.resources.otete_images[0]["center"], (300, 450))
+
+@njit
+def new_frame(x_pos, y_pos, rot, hres, harf_vres, mod, sky, cource, frame):
+    for i in range(hres):
+        i_rot = rot + np.deg2rad(i/mod-30)
+        sin, cos = np.sin(i_rot), np.cos(i_rot)
+        cos2 = np.cos(np.deg2rad(i/mod-30))
+        index = int(np.rad2deg(i_rot)%360)
+        if index >= 360:
+            index = 359
+        frame[i][:] = sky[index][:]/255
+
+        for j in range(harf_vres):
+            n = (harf_vres/(harf_vres-j))/cos2
+            x, y = x_pos + n*cos, y_pos + n*sin
+            xx, yy = int(x/20%1*200), int(y/20%1*200)
+            frame[i][harf_vres*2-j-1] = cource[xx][yy]/255
+
+    return frame
 
 # リザルト画面
 class ResultScreen:

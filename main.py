@@ -35,14 +35,6 @@ class Resource:
 
         self.font = pg.font.Font("./fonts/cellar.ttf", 20)
 
-        # (x, y, width, height, text, font, color, hover_color)
-        self.start_screen_button = Button(400, 500, 400, 100, "Back to Start Screen", self.font, (26, 175, 0), (76, 225, 50))
-        self.character_select_button = Button(500, 300, 300, 100, "Time Attack", self.font, (26, 175, 0), (76, 225, 50))
-        self.how_to_play_button = Button(500, 400, 300, 100, "How to Play", self.font, (26, 175, 0), (76, 225, 50))
-        self.credit_button = Button(500, 500, 300, 100, "Credit", self.font, (26, 175, 0), (76, 225, 50))
-        self.cource_select_button = Button(400, 500, 400, 100, "Go To Cource Select", self.font, (26, 175, 0), (76, 225, 50))
-        self.time_attack_button = Button(500, 500, 300, 100, "Time Attack", self.font, (26, 175, 0), (76, 225, 50))
-
         arrow_scale = 2
         self.right_arrow = pg.image.load("./img/right_arrow.png")
         self.right_arrow = pg.transform.scale(self.right_arrow, (self.right_arrow.get_width() * arrow_scale, self.right_arrow.get_height() * arrow_scale))

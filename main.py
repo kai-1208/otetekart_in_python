@@ -183,11 +183,12 @@ class TimeAttack:
         self.lap_detection = False
         self.lap_count = 0
         self.lap_start_time = time.time()
-        self.lap_time = []
+        self.lap_times = []
         self.frame = np.random.uniform(0, 1, (self.hres, self.harf_vres*2, 3))
         self.cource = pg.surfarray.array3d(self.resources.cource_images[0]["show"])
         self.sky = pg.surfarray.array3d(pg.transform.scale(self.resources.cource_images[1]["sky"], (360, self.harf_vres*2)))
         self.collision_check = False
+        self.font = pg.font.Font("./fonts/enter-the-gungeon-big.ttf", 20)
 
     def run(self, screen, events):
         for event in events:
@@ -254,11 +255,10 @@ class TimeAttack:
                     self.lap_detection = False
                     lap_end_time = time.time()
                     lap_time = lap_end_time - self.lap_start_time
-                    self.lap_time.append(lap_time)
+                    self.lap_times.append(lap_time)
                     self.lap_start_time = lap_end_time
-                    print(f"Lap {self.lap_count}: {lap_time:.2f} seconds")
                     if self.lap_count == 3:
-                        print(f"Goal! Total time: {sum(self.lap_time):.2f} seconds")
+                        self.total_time = sum(self.lap_times)
 
         screen.blit(self.resources.cource_images[0]["collision"], (0, 0))
         screen.blit(self.resources.player, (x_pos * 10, y_pos * 10))
@@ -270,6 +270,14 @@ class TimeAttack:
             screen.blit(self.resources.otete_images[0]["right"], (300, 450))
         else:
             screen.blit(self.resources.otete_images[0]["center"], (300, 450))
+
+        for i, lap_time in enumerate(self.lap_times):
+            lap_text = self.font.render(f"Lap {i+1} {lap_time:.2f} seconds", True, (255, 255, 255))
+            screen.blit(lap_text, (400, 10 + i * 30))
+
+        if self.lap_count == 3:
+            total_time_text = self.font.render(f"Total time {self.total_time:.2f} seconds", True, (255, 255, 255))
+            screen.blit(total_time_text, (400, 10 + len(self.lap_times) * 30))
 
 @njit
 def new_frame(x_pos, y_pos, rot, hres, harf_vres, mod, sky, cource, frame):

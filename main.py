@@ -180,6 +180,10 @@ class TimeAttack:
         self.mod = self.hres/60
         self.x_pos, self.y_pos, self.rot = 13, 2.5, np.pi
         self.velocity = 0
+        self.lap_detection = False
+        self.lap_count = 0
+        self.lap_start_time = time.time()
+        self.lap_time = []
         self.frame = np.random.uniform(0, 1, (self.hres, self.harf_vres*2, 3))
         self.cource = pg.surfarray.array3d(self.resources.cource_images[0]["show"])
         self.sky = pg.surfarray.array3d(pg.transform.scale(self.resources.cource_images[1]["sky"], (360, self.harf_vres*2)))
@@ -242,6 +246,19 @@ class TimeAttack:
                 self.collision_check = False
             elif (pixel_color == [127, 0, 0]).all():
                 self.collision_check = "Dirt"
+            elif (pixel_color == [255, 255, 0]).all():
+                self.lap_detection = True
+            elif (pixel_color == [255, 0, 0]).all():
+                if self.lap_detection == True:
+                    self.lap_count += 1
+                    self.lap_detection = False
+                    lap_end_time = time.time()
+                    lap_time = lap_end_time - self.lap_start_time
+                    self.lap_time.append(lap_time)
+                    self.lap_start_time = lap_end_time
+                    print(f"Lap {self.lap_count}: {lap_time:.2f} seconds")
+                    if self.lap_count == 3:
+                        print(f"Goal! Total time: {sum(self.lap_time):.2f} seconds")
 
         screen.blit(self.resources.cource_images[0]["collision"], (0, 0))
         screen.blit(self.resources.player, (x_pos * 10, y_pos * 10))

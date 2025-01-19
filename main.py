@@ -26,15 +26,15 @@ class Resource:
         self.character_select_bg = pg.image.load("./img/character_select_bg.png")
         self.character_select_bg = pg.transform.scale(self.character_select_bg, (self.character_select_bg.get_width() * 5, self.character_select_bg.get_height() * 5))
 
-        font = pg.font.Font("./fonts/enter-the-gungeon-big.ttf", 30)
+        self.font = pg.font.Font("./fonts/cellar.ttf", 30)
 
         # (x, y, width, height, text, font, color, hover_color)
-        self.start_screen_button = Button(300, 500, 500, 100, "Back to Start Screen", font, (26, 175, 0), (255, 255, 255))
-        self.character_select_button = Button(500, 300, 300, 100, "Time Attack", font, (26, 175, 0), (255, 255, 255))
-        self.how_to_play_button = Button(500, 400, 300, 100, "How to Play", font, (26, 175, 0), (255, 255, 255))
-        self.credit_button = Button(500, 500, 300, 100, "Credit", font, (26, 175, 0), (255, 255, 255))
-        self.cource_select_button = Button(500, 500, 300, 100, "Cource Select", font, (26, 175, 0), (255, 255, 255))
-        self.time_attack_button = Button(500, 500, 300, 100, "Time Attack", font, (26, 175, 0), (255, 255, 255))
+        self.start_screen_button = Button(300, 500, 500, 100, "Back to Start Screen", self.font, (26, 175, 0), (255, 255, 255))
+        self.character_select_button = Button(500, 300, 300, 100, "Time Attack", self.font, (26, 175, 0), (255, 255, 255))
+        self.how_to_play_button = Button(500, 400, 300, 100, "How to Play", self.font, (26, 175, 0), (255, 255, 255))
+        self.credit_button = Button(500, 500, 300, 100, "Credit", self.font, (26, 175, 0), (255, 255, 255))
+        self.cource_select_button = Button(500, 500, 300, 100, "Cource Select", self.font, (26, 175, 0), (255, 255, 255))
+        self.time_attack_button = Button(500, 500, 300, 100, "Time Attack", self.font, (26, 175, 0), (255, 255, 255))
 
         arrow_scale = 2
         self.right_arrow = pg.image.load("./img/right_arrow.png")
@@ -172,7 +172,7 @@ class TimeAttack:
         self.hres = 120 # 水平解像度
         self.harf_vres = 100 # 垂直解像度の半分
         self.mod = self.hres/60
-        self.font = pg.font.Font("./fonts/enter-the-gungeon-big.ttf", 20)
+        self.font = pg.font.Font("./fonts/cellar.ttf", 20)
         self.reset()
 
     def reset(self):
@@ -275,11 +275,11 @@ class TimeAttack:
             screen.blit(self.resources.otete_images[self.resources.current_otete]["center"], (300, 450))
 
         for i, lap_time in enumerate(self.lap_times):            
-            lap_text = self.font.render(f"Lap {i+1} {lap_time:.2f} seconds", True, (255, 255, 255))
+            lap_text = self.font.render(f"Lap {i+1} : {lap_time:.2f} seconds", True, (255, 255, 255))
             screen.blit(lap_text, (400, 10 + i * 30))
 
         if self.lap_count == 3:
-            total_time_text = self.font.render(f"Total time {self.total_time:.2f} seconds", True, (255, 255, 255))
+            total_time_text = self.font.render(f"Total time : {self.total_time:.2f} seconds", True, (255, 255, 255))
             screen.blit(total_time_text, (400, 10 + len(self.lap_times) * 30))
             thank_you_text = self.font.render("Thank you for playing!", True, (255, 255, 255))
             screen.blit(thank_you_text, (400, 10 + (len(self.lap_times) + 1) * 30))
@@ -308,10 +308,20 @@ def new_frame(x_pos, y_pos, rot, hres, harf_vres, mod, sky, cource, frame):
 class HowToPlayScreen:
     def __init__(self, resources):
         self.resources = resources
+        self.font = self.resources.font
 
     def run(self, screen, events):
         screen.blit(self.resources.character_select_bg, (0, 0))
         self.resources.start_screen_button.draw(screen)
+
+        key_bindings_text1 = self.font.render("Key Bindings :", True, (255, 255, 255))
+        screen.blit(key_bindings_text1, (50, 100))
+        key_bindings_text2 = self.font.render("W key / Up Arrow : Accelerate", True, (255, 255, 255))
+        screen.blit(key_bindings_text2, (50, 150))
+        key_bindings_text3 = self.font.render("A key / Left Arrow : Turn Left", True, (255, 255, 255))
+        screen.blit(key_bindings_text3, (50, 200))
+        key_bindings_text4 = self.font.render("D key / Right Arrow : Turn Right", True, (255, 255, 255))
+        screen.blit(key_bindings_text4, (50, 250))
 
         for event in events:
             if event.type == pg.QUIT:
@@ -324,6 +334,7 @@ class HowToPlayScreen:
 class CreditScreen:
     def __init__(self, resources):
         self.resources = resources
+        self.font = self.resources.font
 
     def run(self, screen, events):
         screen.blit(self.resources.character_select_bg, (0, 0))

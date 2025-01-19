@@ -206,6 +206,9 @@ class TimeAttack:
         return GameState.time_attack
 
     def movement(self, x_pos, y_pos, rot, keys, collision_check, velocity):
+        if self.lap_count == 3:
+            return x_pos, y_pos, rot, velocity
+
         if keys[pg.K_LEFT] or keys[pg.K_a]:
             rot -= 0.03
         if keys[pg.K_RIGHT] or keys[pg.K_d]:
@@ -271,13 +274,15 @@ class TimeAttack:
         else:
             screen.blit(self.resources.otete_images[0]["center"], (300, 450))
 
-        for i, lap_time in enumerate(self.lap_times):
+        for i, lap_time in enumerate(self.lap_times):            
             lap_text = self.font.render(f"Lap {i+1} {lap_time:.2f} seconds", True, (255, 255, 255))
             screen.blit(lap_text, (400, 10 + i * 30))
 
         if self.lap_count == 3:
             total_time_text = self.font.render(f"Total time {self.total_time:.2f} seconds", True, (255, 255, 255))
             screen.blit(total_time_text, (400, 10 + len(self.lap_times) * 30))
+            thank_you_text = self.font.render("Thank you for playing!", True, (255, 255, 255))
+            screen.blit(thank_you_text, (400, 10 + (len(self.lap_times) + 1) * 30))
 
 @njit
 def new_frame(x_pos, y_pos, rot, hres, harf_vres, mod, sky, cource, frame):

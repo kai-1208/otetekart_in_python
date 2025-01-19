@@ -15,7 +15,7 @@ class GameState:
     character_select = "characterSelect"
     cource_select = "courceSelect"
     time_attack = "timeAttack"
-    result_screen = "resultScreen"
+    how_to_play = "howToPlay"
     credit_screen = "creditScreen"
 
 # リソース管理
@@ -33,6 +33,7 @@ class Resource:
         font = pg.font.Font(font_path, font_size)
 
         # (x, y, width, height, text, font, color, hover_color)
+        self.start_screen_button = Button(300, 500, 500, 100, "Back to Start Screen", font, (26, 175, 0), (255, 255, 255))
         self.character_select_button = Button(500, 300, 300, 100, "Time Attack", font, (26, 175, 0), (255, 255, 255))
         self.credit_button = Button(500, 400, 300, 100, "Credit", font, (26, 175, 0), (255, 255, 255))
         self.cource_select_button = Button(500, 500, 300, 100, "Cource Select", font, (26, 175, 0), (255, 255, 255))
@@ -178,6 +179,10 @@ class TimeAttack:
         self.hres = 120 # 水平解像度
         self.harf_vres = 100 # 垂直解像度の半分
         self.mod = self.hres/60
+        self.font = pg.font.Font("./fonts/enter-the-gungeon-big.ttf", 20)
+        self.reset()
+
+    def reset(self):
         self.x_pos, self.y_pos, self.rot = 13, 2.5, np.pi
         self.velocity = 0
         self.lap_detection = False
@@ -188,12 +193,15 @@ class TimeAttack:
         self.cource = pg.surfarray.array3d(self.resources.cource_images[0]["show"])
         self.sky = pg.surfarray.array3d(pg.transform.scale(self.resources.cource_images[1]["sky"], (360, self.harf_vres*2)))
         self.collision_check = False
-        self.font = pg.font.Font("./fonts/enter-the-gungeon-big.ttf", 20)
+
 
     def run(self, screen, events):
         for event in events:
             if event.type == pg.QUIT:
                 return "quit"
+            if self.resources.start_screen_button.is_clicked(event):
+                self.reset()
+                return GameState.start_screen
 
         self.frame = new_frame(self.x_pos, self.y_pos, self.rot, self.hres, self.harf_vres, self.mod, self.sky, self.cource, self.frame)
         surf = pg.surfarray.make_surface(self.frame*255)
@@ -283,6 +291,7 @@ class TimeAttack:
             screen.blit(total_time_text, (400, 10 + len(self.lap_times) * 30))
             thank_you_text = self.font.render("Thank you for playing!", True, (255, 255, 255))
             screen.blit(thank_you_text, (400, 10 + (len(self.lap_times) + 1) * 30))
+            self.resources.start_screen_button.draw(screen)
 
 @njit
 def new_frame(x_pos, y_pos, rot, hres, harf_vres, mod, sky, cource, frame):
@@ -303,14 +312,14 @@ def new_frame(x_pos, y_pos, rot, hres, harf_vres, mod, sky, cource, frame):
 
     return frame
 
-# リザルト画面
-class ResultScreen:
-    def __init__(self):
+# 操作説明画面
+class HowToPlayScreen:
+    def __init__(self, resources):
         pass
 
 # クレジット画面    
 class CreditScreen:
-    def __init__(self):
+    def __init__(self, resources):
         pass
 
 # メインループ
@@ -322,8 +331,8 @@ def main():
         GameState.character_select: CharacterSelect(resources),
         GameState.cource_select: CourceSelect(resources),
         GameState.time_attack: TimeAttack(resources),
-        # GameState.result_screen: ResultScreen(resources),
-        # GameState.credit_screen: CreditScreen(resources),
+        GameState.how_to_play: HowToPlayScreen(resources),
+        GameState.credit_screen: CreditScreen(resources),
     }
     running = True
     while running:

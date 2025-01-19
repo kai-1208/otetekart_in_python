@@ -65,6 +65,8 @@ class Resource:
         self.player = pg.image.load("./img/player.png")
         # player_scale = 10
         # self.player = pg.transform.scale(self.player, (self.player.get_width() * player_scale, self.player.get_height() * player_scale))
+        self.current_otete = 1
+        self.current_cource = 0
 
 class Button:
     def __init__(self, x, y, width, height, text, font, color, hover_color):
@@ -120,12 +122,11 @@ class StartScrean:
 class CharacterSelect:
     def __init__(self, resources):
         self.resources = resources
-        self.current_otete = 1
 
     def run(self, screen, events):
         screen.blit(self.resources.character_select_bg, (0, 0))
 
-        screen.blit(self.resources.otete_images[self.current_otete]["select"], (300, 200))
+        screen.blit(self.resources.otete_images[self.resources.current_otete]["select"], (300, 200))
 
         screen.blit(self.resources.left_arrow, (200, 300))
         screen.blit(self.resources.right_arrow, (500, 300))
@@ -137,9 +138,9 @@ class CharacterSelect:
                 return "quit"
             if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
                 if pg.Rect(200, 300, 100, 100).collidepoint(event.pos):
-                    self.current_otete = (self.current_otete - 1) % 4
+                    self.resources.current_otete = (self.resources.current_otete - 1) % 4
                 if pg.Rect(500, 300, 100, 100).collidepoint(event.pos):
-                    self.current_otete = (self.current_otete + 1) % 4
+                    self.resources.current_otete = (self.resources.current_otete + 1) % 4
             if self.resources.cource_select_button.is_clicked(event):
                 return GameState.cource_select
         return GameState.character_select
@@ -148,12 +149,11 @@ class CharacterSelect:
 class CourceSelect:
     def __init__(self, resources):
         self.resources = resources
-        self.current_cource = 0
 
     def run(self, screen, events):
         screen.blit(self.resources.cource_select_bg, (0, 0))
 
-        screen.blit(self.resources.cource_images[self.current_cource]["show"], (300, 200))
+        screen.blit(self.resources.cource_images[self.resources.current_cource]["show"], (300, 200))
 
         screen.blit(self.resources.left_arrow, (200, 300))
         screen.blit(self.resources.right_arrow, (500, 300))
@@ -165,9 +165,9 @@ class CourceSelect:
                 return "quit"
             if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
                 if pg.Rect(200, 300, 100, 100).collidepoint(event.pos):
-                    self.current_cource = (self.current_cource - 1) % 4
+                    self.resources.current_cource = (self.resources.current_cource - 1) % 4
                 if pg.Rect(500, 300, 100, 100).collidepoint(event.pos):
-                    self.current_cource = (self.current_cource + 1) % 4
+                    self.resources.current_cource = (self.resources.current_cource + 1) % 4
             if self.resources.time_attack_button.is_clicked(event):
                 return GameState.time_attack
         return GameState.cource_select
@@ -185,15 +185,12 @@ class TimeAttack:
     def reset(self):
         self.x_pos, self.y_pos, self.rot = 13, 2.5, np.pi
         self.velocity = 0
-        self.lap_detection = False
+        self.lap_detection = False # 周回判定
         self.lap_count = 0
         self.lap_start_time = time.time()
         self.lap_times = []
-        self.frame = np.random.uniform(0, 1, (self.hres, self.harf_vres*2, 3))
-        self.cource = pg.surfarray.array3d(self.resources.cource_images[0]["show"])
-        self.sky = pg.surfarray.array3d(pg.transform.scale(self.resources.cource_images[1]["sky"], (360, self.harf_vres*2)))
-        self.collision_check = False
-
+        self.frame = np.random.uniform(0, 1, (self.hres, self.harf_vres * 2, 3)) # フレームの初期化
+        self.collision_check = False # 当たり判定
 
     def run(self, screen, events):
         for event in events:
@@ -203,6 +200,8 @@ class TimeAttack:
                 self.reset()
                 return GameState.start_screen
 
+        self.cource = pg.surfarray.array3d(self.resources.cource_images[self.resources.current_cource]["show"])
+        self.sky = pg.surfarray.array3d(pg.transform.scale(self.resources.cource_images[self.resources.current_cource]["sky"], (360, self.harf_vres*2)))
         self.frame = new_frame(self.x_pos, self.y_pos, self.rot, self.hres, self.harf_vres, self.mod, self.sky, self.cource, self.frame)
         surf = pg.surfarray.make_surface(self.frame*255)
         surf = pg.transform.scale(surf, (800, 600))
@@ -247,7 +246,7 @@ class TimeAttack:
 
     def collision(self, x_pos, y_pos, rot):
         player_x, player_y = int(x_pos * 10), int(y_pos * 10)
-        cource_array = pg.surfarray.array3d(self.resources.cource_images[0]["collision"])
+        cource_array = pg.surfarray.array3d(self.resources.cource_images[self.resources.current_cource]["collision"])
 
         if 0 <= player_x < cource_array.shape[0] and 0 <= player_y < cource_array.shape[1]:
             pixel_color = cource_array[player_x, player_y]
@@ -271,16 +270,16 @@ class TimeAttack:
                     if self.lap_count == 3:
                         self.total_time = sum(self.lap_times)
 
-        screen.blit(self.resources.cource_images[0]["collision"], (0, 0))
+        screen.blit(self.resources.cource_images[self.resources.current_cource]["collision"], (0, 0))
         screen.blit(self.resources.player, (x_pos * 10, y_pos * 10))
 
     def render(self, screen, keys):
         if keys[pg.K_LEFT] or keys[pg.K_a]:
-            screen.blit(self.resources.otete_images[0]["left"], (300, 450))
+            screen.blit(self.resources.otete_images[self.resources.current_otete]["left"], (300, 450))
         elif keys[pg.K_RIGHT] or keys[pg.K_d]:
-            screen.blit(self.resources.otete_images[0]["right"], (300, 450))
+            screen.blit(self.resources.otete_images[self.resources.current_otete]["right"], (300, 450))
         else:
-            screen.blit(self.resources.otete_images[0]["center"], (300, 450))
+            screen.blit(self.resources.otete_images[self.resources.current_otete]["center"], (300, 450))
 
         for i, lap_time in enumerate(self.lap_times):            
             lap_text = self.font.render(f"Lap {i+1} {lap_time:.2f} seconds", True, (255, 255, 255))

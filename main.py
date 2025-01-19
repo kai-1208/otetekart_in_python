@@ -36,11 +36,11 @@ class Resource:
         self.font = pg.font.Font("./fonts/cellar.ttf", 20)
 
         # (x, y, width, height, text, font, color, hover_color)
-        self.start_screen_button = Button(300, 500, 500, 100, "Back to Start Screen", self.font, (26, 175, 0), (76, 225, 50))
+        self.start_screen_button = Button(400, 500, 400, 100, "Back to Start Screen", self.font, (26, 175, 0), (76, 225, 50))
         self.character_select_button = Button(500, 300, 300, 100, "Time Attack", self.font, (26, 175, 0), (76, 225, 50))
         self.how_to_play_button = Button(500, 400, 300, 100, "How to Play", self.font, (26, 175, 0), (76, 225, 50))
         self.credit_button = Button(500, 500, 300, 100, "Credit", self.font, (26, 175, 0), (76, 225, 50))
-        self.cource_select_button = Button(500, 500, 300, 100, "Cource Select", self.font, (26, 175, 0), (76, 225, 50))
+        self.cource_select_button = Button(400, 500, 400, 100, "Go To Cource Select", self.font, (26, 175, 0), (76, 225, 50))
         self.time_attack_button = Button(500, 500, 300, 100, "Time Attack", self.font, (26, 175, 0), (76, 225, 50))
 
         arrow_scale = 2
@@ -112,21 +112,24 @@ class Button:
 class StartScrean:
     def __init__(self, resources):
         self.resources = resources
+        self.button1 = Button(400, 300, 400, 100, "Time Attack", self.resources.font, (26, 175, 0), (76, 225, 50))
+        self.button2 = Button(400, 400, 400, 100, "How to Play", self.resources.font, (26, 175, 0), (76, 225, 50))
+        self.button3 = Button(400, 500, 400, 100, "Credit", self.resources.font, (26, 175, 0), (76, 225, 50))
 
     def run(self, screen, events):
         screen.blit(self.resources.start_screen_bg, (0, 0))
-        self.resources.character_select_button.draw(screen)
-        self.resources.how_to_play_button.draw(screen)
-        self.resources.credit_button.draw(screen)
+        self.button1.draw(screen)
+        self.button2.draw(screen)
+        self.button3.draw(screen)
 
         for event in events:
             if event.type == pg.QUIT:
                 return "quit"
-            if self.resources.character_select_button.is_clicked(event):
+            if self.button1.is_clicked(event):
                 return GameState.character_select
-            if self.resources.how_to_play_button.is_clicked(event):
+            if self.button2.is_clicked(event):
                 return GameState.how_to_play
-            if self.resources.credit_button.is_clicked(event):
+            if self.button3.is_clicked(event):
                 return GameState.credit_screen
         return GameState.start_screen
 
@@ -135,13 +138,16 @@ class StartScrean:
 class CharacterSelect:
     def __init__(self, resources):
         self.resources = resources
+        self.button1 = Button(0, 500, 400, 100, "Back to Start Screen", self.resources.font, (26, 175, 0), (76, 225, 50))
+        self.button2 = Button(400, 500, 400, 100, "Go to Cource Select", self.resources.font, (26, 175, 0), (76, 225, 50))
 
     def run(self, screen, events):
         screen.blit(self.resources.character_select_bg, (0, 0))
         screen.blit(self.resources.otete_images[self.resources.current_otete]["select"], (300, 200))
         screen.blit(self.resources.left_arrow, (200, 300))
         screen.blit(self.resources.right_arrow, (500, 300))
-        self.resources.cource_select_button.draw(screen)
+        self.button1.draw(screen)
+        self.button2.draw(screen)
 
         for event in events:
             if event.type == pg.QUIT:
@@ -151,7 +157,9 @@ class CharacterSelect:
                     self.resources.current_otete = (self.resources.current_otete - 1) % 4
                 if pg.Rect(500, 300, 100, 100).collidepoint(event.pos):
                     self.resources.current_otete = (self.resources.current_otete + 1) % 4
-            if self.resources.cource_select_button.is_clicked(event):
+            if self.button1.is_clicked(event):
+                return GameState.start_screen
+            if self.button2.is_clicked(event):
                 return GameState.cource_select
         return GameState.character_select
 
@@ -159,13 +167,16 @@ class CharacterSelect:
 class CourceSelect:
     def __init__(self, resources):
         self.resources = resources
+        self.button1 = Button(0, 500, 400, 100, "Back to Character Select", self.resources.font, (26, 175, 0), (76, 225, 50))
+        self.button2 = Button(400, 500, 400, 100, "Go to Time Attack", self.resources.font, (26, 175, 0), (76, 225, 50))
 
     def run(self, screen, events):
         screen.blit(self.resources.character_select_bg, (0, 0))
         screen.blit(self.resources.cource_images[self.resources.current_cource]["show"], (300, 200))
         screen.blit(self.resources.left_arrow, (200, 300))
         screen.blit(self.resources.right_arrow, (500, 300))
-        self.resources.time_attack_button.draw(screen)
+        self.button1.draw(screen)
+        self.button2.draw(screen)
 
         for event in events:
             if event.type == pg.QUIT:
@@ -175,7 +186,9 @@ class CourceSelect:
                     self.resources.current_cource = (self.resources.current_cource - 1) % 4
                 if pg.Rect(500, 300, 100, 100).collidepoint(event.pos):
                     self.resources.current_cource = (self.resources.current_cource + 1) % 4
-            if self.resources.time_attack_button.is_clicked(event):
+            if self.button1.is_clicked(event):
+                return GameState.character_select
+            if self.button2.is_clicked(event):
                 return GameState.time_attack
         return GameState.cource_select
 
@@ -183,6 +196,7 @@ class CourceSelect:
 class TimeAttack:
     def __init__(self, resources):
         self.resources = resources
+        self.button = Button(400, 500, 400, 100, "Back to Start Screen", self.resources.font, (26, 175, 0), (76, 225, 50))
         self.hres = 120 # 水平解像度
         self.harf_vres = 100 # 垂直解像度の半分
         self.mod = self.hres/60
@@ -221,7 +235,7 @@ class TimeAttack:
         for event in events:
             if event.type == pg.QUIT:
                 return "quit"
-            if self.resources.start_screen_button.is_clicked(event):
+            if self.button.is_clicked(event):
                 self.reset()
                 return GameState.start_screen
             if event.type == pg.KEYDOWN and event.key == pg.K_p:
@@ -236,7 +250,7 @@ class TimeAttack:
 
         if self.paused:
             screen.blit(self.font.render("Paused", True, (255, 255, 255)), (400, 300))
-            self.resources.start_screen_button.draw(screen)
+            self.button.draw(screen)
             pg.display.flip()
             return GameState.time_attack
 
@@ -350,9 +364,9 @@ class TimeAttack:
             screen.blit(total_time_text, (400, 10 + len(self.lap_times) * 30))
             thank_you_text = self.font.render("Thank you for playing!", True, (255, 255, 255))
             screen.blit(thank_you_text, (400, 10 + (len(self.lap_times) + 1) * 30))
-            self.resources.start_screen_button.draw(screen)
+            self.button.draw(screen)
 
-@njit
+@njit # fps上げるためにnumbaで高速化
 def new_frame(x_pos, y_pos, rot, hres, harf_vres, mod, sky, cource, frame):
     for i in range(hres):
         i_rot = rot + np.deg2rad(i/mod-30)
@@ -376,10 +390,11 @@ class HowToPlayScreen:
     def __init__(self, resources):
         self.resources = resources
         self.font = self.resources.font
+        self.button = Button(400, 500, 400, 100, "Back to Start Screen", self.font, (26, 175, 0), (76, 225, 50))
 
     def run(self, screen, events):
         screen.blit(self.resources.character_select_bg, (0, 0))
-        self.resources.start_screen_button.draw(screen)
+        self.button.draw(screen)
 
         key_bindings_text1 = self.font.render("Key Bindings :", True, (255, 255, 255))
         screen.blit(key_bindings_text1, (50, 100))
@@ -395,7 +410,7 @@ class HowToPlayScreen:
         for event in events:
             if event.type == pg.QUIT:
                 return "quit"
-            if self.resources.start_screen_button.is_clicked(event):
+            if self.button.is_clicked(event):
                 return GameState.start_screen
         return GameState.how_to_play
 
@@ -404,10 +419,11 @@ class CreditScreen:
     def __init__(self, resources):
         self.resources = resources
         self.font = self.resources.font
+        self.button = Button(400, 500, 400, 100, "Back to Start Screen", self.font, (26, 175, 0), (76, 225, 50))
 
     def run(self, screen, events):
         screen.blit(self.resources.character_select_bg, (0, 0))
-        self.resources.start_screen_button.draw(screen)
+        self.button.draw(screen)
 
         credit_text1 = self.font.render("Creator : kai-1208", True, (255, 255, 255))
         screen.blit(credit_text1, (50, 100))
@@ -423,7 +439,7 @@ class CreditScreen:
         for event in events:
             if event.type == pg.QUIT:
                 return "quit"
-            if self.resources.start_screen_button.is_clicked(event):
+            if self.button.is_clicked(event):
                 return GameState.start_screen
         return GameState.credit_screen
 

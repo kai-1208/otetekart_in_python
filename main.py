@@ -62,8 +62,8 @@ class Resource:
                 "sky": cource.subsurface(pg.Rect(400, 0, 200, 50)),
             }
         self.player = pg.image.load("./img/player.png")
-        player_scale = 10
-        self.player = pg.transform.scale(self.player, (self.player.get_width() * player_scale, self.player.get_height() * player_scale))
+        # player_scale = 10
+        # self.player = pg.transform.scale(self.player, (self.player.get_width() * player_scale, self.player.get_height() * player_scale))
 
 class Button:
     def __init__(self, x, y, width, height, text, font, color, hover_color):

@@ -26,15 +26,15 @@ class Resource:
         self.character_select_bg = pg.image.load("./img/character_select_bg.png")
         self.character_select_bg = pg.transform.scale(self.character_select_bg, (self.character_select_bg.get_width() * 5, self.character_select_bg.get_height() * 5))
 
-        self.font = pg.font.Font("./fonts/cellar.ttf", 30)
+        self.font = pg.font.Font("./fonts/cellar.ttf", 20)
 
         # (x, y, width, height, text, font, color, hover_color)
-        self.start_screen_button = Button(300, 500, 500, 100, "Back to Start Screen", self.font, (26, 175, 0), (255, 255, 255))
-        self.character_select_button = Button(500, 300, 300, 100, "Time Attack", self.font, (26, 175, 0), (255, 255, 255))
-        self.how_to_play_button = Button(500, 400, 300, 100, "How to Play", self.font, (26, 175, 0), (255, 255, 255))
-        self.credit_button = Button(500, 500, 300, 100, "Credit", self.font, (26, 175, 0), (255, 255, 255))
-        self.cource_select_button = Button(500, 500, 300, 100, "Cource Select", self.font, (26, 175, 0), (255, 255, 255))
-        self.time_attack_button = Button(500, 500, 300, 100, "Time Attack", self.font, (26, 175, 0), (255, 255, 255))
+        self.start_screen_button = Button(300, 500, 500, 100, "Back to Start Screen", self.font, (26, 175, 0), (76, 225, 50))
+        self.character_select_button = Button(500, 300, 300, 100, "Time Attack", self.font, (26, 175, 0), (76, 225, 50))
+        self.how_to_play_button = Button(500, 400, 300, 100, "How to Play", self.font, (26, 175, 0), (76, 225, 50))
+        self.credit_button = Button(500, 500, 300, 100, "Credit", self.font, (26, 175, 0), (76, 225, 50))
+        self.cource_select_button = Button(500, 500, 300, 100, "Cource Select", self.font, (26, 175, 0), (76, 225, 50))
+        self.time_attack_button = Button(500, 500, 300, 100, "Time Attack", self.font, (26, 175, 0), (76, 225, 50))
 
         arrow_scale = 2
         self.right_arrow = pg.image.load("./img/right_arrow.png")
@@ -84,7 +84,7 @@ class Button:
         else:
             pg.draw.rect(screen, self.color, self.rect)
 
-        text_surface = self.font.render(self.text, True, (0, 0, 0))
+        text_surface = self.font.render(self.text, True, (255, 255, 255))
         text_rect = text_surface.get_rect(center=(self.x + self.width / 2, self.y + self.height / 2))
         screen.blit(text_surface, text_rect)
 
@@ -173,6 +173,7 @@ class TimeAttack:
         self.harf_vres = 100 # 垂直解像度の半分
         self.mod = self.hres/60
         self.font = pg.font.Font("./fonts/cellar.ttf", 20)
+        self.frame = np.zeros((self.hres, self.harf_vres*2, 3))
         self.countdown_start_time = None
         self.countdown = 4
         self.initialized = False
@@ -189,9 +190,9 @@ class TimeAttack:
         self.lap_count = 0
         self.lap_times = []
         self.collision_check = False # 当たり判定
-        self.frame = np.random.uniform(0, 1, (self.hres, self.harf_vres * 2, 3)) # フレームの初期化
         self.cource = pg.surfarray.array3d(self.resources.cource_images[self.resources.current_cource]["show"])
         self.sky = pg.surfarray.array3d(pg.transform.scale(self.resources.cource_images[self.resources.current_cource]["sky"], (360, self.harf_vres*2)))
+        self.frame = new_frame(self.x_pos, self.y_pos, self.rot, self.hres, self.harf_vres, self.mod, self.sky, self.cource, self.frame)
         if not self.initialized:
             self.frame = new_frame(self.x_pos, self.y_pos, self.rot, self.hres, self.harf_vres, self.mod, self.sky, self.cource, self.frame)
             self.initialized = True
@@ -218,8 +219,6 @@ class TimeAttack:
                     self.total_pause_time += time.time() - self.pause_start_time
                     if self.lap_count < len(self.lap_pause_times):
                         self.lap_pause_times[self.lap_count] += pause_time
-                    # else:
-                    #     self.lap_pause_times.append(pause_time)
 
         if self.paused:
             screen.blit(self.font.render("Paused", True, (255, 255, 255)), (400, 300))
@@ -374,6 +373,8 @@ class HowToPlayScreen:
         screen.blit(key_bindings_text3, (50, 200))
         key_bindings_text4 = self.font.render("D key / Right Arrow : Turn Right", True, (255, 255, 255))
         screen.blit(key_bindings_text4, (50, 250))
+        key_bindings_text5 = self.font.render("P key : Pause", True, (255, 255, 255))
+        screen.blit(key_bindings_text5, (50, 300))
 
         for event in events:
             if event.type == pg.QUIT:

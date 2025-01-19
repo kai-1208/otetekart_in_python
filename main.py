@@ -141,6 +141,15 @@ class CharacterSelect:
         self.button1.draw(screen)
         self.button2.draw(screen)
 
+        chracter_name = self.resources.character_parameter[self.resources.current_otete].name
+        speed = self.resources.character_parameter[self.resources.current_otete].speed
+        acceleration = self.resources.character_parameter[self.resources.current_otete].acceleration
+        handling = self.resources.character_parameter[self.resources.current_otete].handling
+        chracter_name_text = self.resources.font.render(f"Name : {chracter_name}", True, (255, 255, 255))
+        parameter_text = self.resources.font.render(f"Speed : {speed}, Acceleration : {acceleration}, Handling : {handling}", True, (255, 255, 255))
+        screen.blit(chracter_name_text, (50, 50))
+        screen.blit(parameter_text, (50, 100))
+
         for event in events:
             if event.type == pg.QUIT:
                 return "quit"

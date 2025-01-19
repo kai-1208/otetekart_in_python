@@ -409,6 +409,17 @@ class CreditScreen:
         screen.blit(self.resources.character_select_bg, (0, 0))
         self.resources.start_screen_button.draw(screen)
 
+        credit_text1 = self.font.render("Creator : kai-1208", True, (255, 255, 255))
+        screen.blit(credit_text1, (50, 100))
+        credit_text2 = self.font.render("Graphics : kai-1208", True, (255, 255, 255))
+        screen.blit(credit_text2, (50, 150))
+        credit_text3 = self.font.render("Music : ", True, (255, 255, 255))
+        screen.blit(credit_text3, (50, 200))
+        credit_text4 = self.font.render("Sound Effect : ", True, (255, 255, 255))
+        screen.blit(credit_text4, (50, 250))
+        credit_text5 = self.font.render("Font (Cellar) : Dan", True, (255, 255, 255))
+        screen.blit(credit_text5, (50, 300))
+
         for event in events:
             if event.type == pg.QUIT:
                 return "quit"

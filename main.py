@@ -18,6 +18,13 @@ class GameState:
     how_to_play = "howToPlay"
     credit_screen = "creditScreen"
 
+class CharacterParameter:
+    def __init__(self, name, speed, acceleration, handling):
+        self.name = name
+        self.speed = speed
+        self.acceleration = acceleration
+        self.handling = handling
+
 # リソース管理
 class Resource:
     def __init__(self):
@@ -64,6 +71,13 @@ class Resource:
         # self.player = pg.transform.scale(self.player, (self.player.get_width() * player_scale, self.player.get_height() * player_scale))
         self.current_otete = 1
         self.current_cource = 0
+
+        self.character_parameter = [
+            CharacterParameter("otete1", 2, 5, 4),
+            CharacterParameter("otete2", 3, 4, 4),
+            CharacterParameter("otete3", 4, 3, 2),
+            CharacterParameter("otete4", 5, 1, 1),
+        ]
 
 class Button:
     def __init__(self, x, y, width, height, text, font, color, hover_color):
@@ -257,14 +271,16 @@ class TimeAttack:
         if self.lap_count == 3:
             return x_pos, y_pos, rot, velocity
 
+        otete = self.resources.character_parameter[self.resources.current_otete]
+
         if keys[pg.K_LEFT] or keys[pg.K_a]:
-            rot -= 0.03
+            rot -= 0.008 * otete.handling
         if keys[pg.K_RIGHT] or keys[pg.K_d]:
-            rot += 0.03
+            rot += 0.008 * otete.handling
         if keys[pg.K_UP] or keys[pg.K_w]:
             if collision_check == False: # 0.05
-                if velocity < 0.05:
-                    velocity += 0.001
+                if velocity < 0.015 * otete.speed:
+                    velocity += 0.0007 * otete.acceleration
                 x_pos += velocity*np.cos(rot)
                 y_pos += velocity*np.sin(rot)
             elif collision_check == True: # 0.1
@@ -272,7 +288,7 @@ class TimeAttack:
                 x_pos += velocity*np.cos(rot)
                 y_pos += velocity*np.sin(rot)
             elif collision_check == "Dirt": # 0.02
-                velocity = 0.02
+                velocity = 0.006 * otete.speed
                 x_pos += velocity*np.cos(rot)
                 y_pos += velocity*np.sin(rot)
         else:

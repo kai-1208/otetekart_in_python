@@ -1,0 +1,11 @@
+# Pythonの仮想環境を無視
+.venv/
+
+# Python関連の不要ファイルを無視
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# 環境依存の設定ファイル
+.env

@@ -68,7 +68,7 @@ class Resource:
             CharacterParameter("otete1", 2, 5, 4),
             CharacterParameter("otete2", 3, 4, 4),
             CharacterParameter("otete3", 4, 3, 2),
-            CharacterParameter("otete4", 5, 1, 1),
+            CharacterParameter("otete4", 5, 2, 1),
         ]
 
 class Button:

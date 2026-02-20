@@ -71,7 +71,7 @@ GitHubリポジトリから、ゲームプログラムおよびサーバ設定�
 1.  任意の作業フォルダ（例: `Documents`）でPowerShellを開く。
 2.  以下のコマンドを実行する。
     ```powershell
-    # リポジトリのURL（適宜書き換えてください）
+    # リポジトリのURLからgit clone
     git clone https://github.com/kai-1208/otetekart_in_python.git
     
     # プロジェクトディレクトリへ移動
@@ -204,13 +204,11 @@ docker-compose up -d --build
     -   下の **[保存]** をクリック。
 
     ![Uptime Kuma設定](./images/uptimekuma_config.png)
-    *(ここに設定画面のスクリーンショットを配置)*
 
 4.  **稼働確認**:
     -   ステータスが緑色の **[正常]** になることを確認する。
 
     ![Uptime Kumaダッシュボード](./images/uptimekuma_dashboard.png)
-    *(ここに緑色になったダッシュボードのスクリーンショットを配置)*
 
 ### 5.2 クライアント接続とゲームロジック検証
 
@@ -240,7 +238,7 @@ python main.py
 ## 6. トラブルシューティング
 
 ### 6.1 Uptime Kuma からサーバが見つからない (DOWN状態)
--   **原因**: ホスト名に localhost や 127.0.0.1 を指定している。
+-   **原因**: ホスト名に `localhost` や `127.0.0.1` を指定している。
 -   **対策**: Uptime Kuma コンテナから見た `localhost` は自分自身を指すため、接続できない。Docker Compose のサービス名である `otetekart-server` をホスト名に指定する。
 
 ### 6.2 クライアントが接続できない
@@ -254,15 +252,15 @@ Test-NetConnection localhost -Port 5000
 ### 6.3 コンテナが起動しない
 -   **原因**: 過去に起動したコンテナが正常に終了せずに残っている、または古いネットワークやボリュームの設定が衝突している可能性がある。
 -   **対処**:
-    1.  PowerShellで以下のコマンドを実行し、一度削除する。
+    1. PowerShellで以下のコマンドを実行し、一度削除する。
     ```powershell
     docker-compose down
     ```
-    2.  以下のコマンドを実行し、古いキャッシュを消す。
+    2. 以下のコマンドを実行し、古いキャッシュを消す。
     ```powershell
     docker system prune
     ```
-    3.  再度以下のコマンドを実行する。
+    3. 再度以下のコマンドを実行する。
     ```powershell
     docker-compose up -d
     ```
@@ -286,6 +284,10 @@ docker exec -it uptime-kuma npm run reset-password
 ---
 
 ## 8. 参考資料
--   [Python 3.11.9 Download](https://www.python.org/downloads/release/python-3119/)
--   [Docker Desktop for Windows](https://docs.docker.com/desktop/windows/)
--   [Uptime Kuma Wiki](https://github.com/louislam/uptime-kuma/wiki)
+本手順書の作成および構築にあたり、以下の公式ドキュメントを参照した。
+- Docker Desktop for Windows:
+https://docs.docker.com/desktop/windows/
+- Python 3.11.9 Download:
+https://www.python.org/downloads/release/python-3119/
+- Uptime Kuma Wiki:
+https://github.com/louislam/uptime-kuma/wiki

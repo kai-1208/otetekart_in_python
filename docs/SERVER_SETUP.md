@@ -252,15 +252,18 @@ Test-NetConnection localhost -Port 5000
 ### 6.3 コンテナが起動しない
 -   **原因**: 過去に起動したコンテナが正常に終了せずに残っている、または古いネットワークやボリュームの設定が衝突している可能性がある。
 -   **対処**:
-    1. PowerShellで以下のコマンドを実行し、一度削除する。
+
+1.  PowerShellで以下のコマンドを実行し、一度削除する。
     ```powershell
     docker-compose down
     ```
-    2. 以下のコマンドを実行し、古いキャッシュを消す。
+
+2.  以下のコマンドを実行し、古いキャッシュを消す。
     ```powershell
     docker system prune
     ```
-    3. 再度以下のコマンドを実行する。
+
+3.  再度以下のコマンドを実行する。
     ```powershell
     docker-compose up -d
     ```
